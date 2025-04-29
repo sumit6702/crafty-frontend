@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.mc-log-info {
+  @apply text-green-500;
+}
+
+.mc-log-error {
+  @apply text-red-500;
+}
+
+.c-log-keyword {
+  @apply text-violet-500;
+}
