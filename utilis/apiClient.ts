@@ -1,7 +1,6 @@
 // utils/apiClient.ts
 import axios from "axios";
-const API_URL =
-  process.env.NEXT_PUBLIC_CRAFTY_URL || "https://localhost:8443/api/v2";
+const API_URL = process.env.NEXT_PUBLIC_CRAFTY_URL;
 
 const apiClient = axios.create({
   baseURL: API_URL,

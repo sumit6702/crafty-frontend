@@ -1,4 +1,5 @@
 import apiClient from "@/utilis/apiClient";
+import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 
 type LogoutResponse = {
@@ -122,16 +123,20 @@ export async function serverDelete(id: string) {
   }
 }
 
-export async function serverConfig(id: string, data: string) {
+export async function serverConfig(id: string, data: Object) {
   try {
-    const response = await apiClient.patch(`/servers/${id}/`, data);
-    return response.data;
+    console.log(data);
+    const response = await apiClient.patch(`/servers/${id}/`, data, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    return response;
   } catch (error) {
     console.error(error);
     throw new Error("Failed to update server");
   }
 }
-
 export async function serverJars() {
   try {
     const response = await apiClient.get("/crafty/JarCache");

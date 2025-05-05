@@ -59,6 +59,7 @@ type Server = {
   first_run: boolean;
   crashed: boolean;
   importing: boolean;
+  java_selection: string;
 };
 
 export default function ServerConfig() {
@@ -68,7 +69,6 @@ export default function ServerConfig() {
   const [serverS, setServerS] = useState<Server | null>(null);
   const [formState, setFormState] = useState({
     server_name: "",
-    path: "",
     executable: "",
     execution_command: "",
     stop_command: "",
@@ -82,6 +82,7 @@ export default function ServerConfig() {
     logs_delete_after: 0,
     count_players: false,
     show_status: false,
+    java_selection: "none",
     // ...add other fields as needed
   });
 
@@ -102,7 +103,6 @@ export default function ServerConfig() {
     if (serverS) {
       setFormState({
         server_name: serverS.server_id.server_name || "",
-        path: serverS.server_id.path || "",
         executable: serverS.server_id.executable || "",
         execution_command: serverS.server_id.execution_command || "",
         stop_command: serverS.server_id.stop_command || "",
@@ -116,6 +116,7 @@ export default function ServerConfig() {
         logs_delete_after: serverS.server_id.logs_delete_after || 0,
         count_players: serverS.server_id.count_players || false,
         show_status: serverS.server_id.show_status || false,
+        java_selection: "none",
         // ...add other fields as needed
       });
     }
@@ -139,7 +140,7 @@ export default function ServerConfig() {
   const handleFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      await serverConfig(serverID, JSON.stringify(formState));
+      await serverConfig(serverID, formState);
       fetchServer();
     } catch (error) {
       console.error("Failed to update server:", error);
