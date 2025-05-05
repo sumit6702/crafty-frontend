@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Form,
   Input,
@@ -8,42 +8,66 @@ import {
   CardFooter,
   CardHeader,
 } from "@heroui/react";
-import { serverAction, serverLogs } from "@/lib/api/servers_helps";
 import { useParams } from "next/navigation";
 import CommandInput from "./command-input";
+import {
+  serverAction,
+  serverLogs,
+  serverStats,
+} from "@/lib/api/craftyController";
 
 export default function CommandPanel() {
-  const params = useParams();
+  const { slug } = useParams();
+  const serverId = (slug as string) || "";
+
   const [log, setLog] = useState<string>("");
+  const [serverRunning, setServerRunning] = useState<boolean>(false);
 
-  const handleAction = async (action: string) => {
-    const token = localStorage.getItem("token") || "";
-    const serverId = (params.slug as string) || "";
+  const serverStatus = useCallback(async () => {
+    try {
+      const { data } = await serverStats(serverId);
+      setServerRunning(data.running);
+    } catch (error) {
+      console.error("Failed to fetch server status:", error);
+    }
+  }, [serverId]);
 
-    await serverAction(token, serverId, action);
-  };
+  const handleAction = useCallback(
+    async (action: string) => {
+      try {
+        await serverAction(serverId, action);
+        serverStatus();
+        setTimeout(serverStatus, 4000);
+      } catch (error) {
+        console.error("Failed to perform server action:", error);
+      }
+    },
+    [serverId, serverStatus]
+  );
 
   useEffect(() => {
-    let isMounted = true; // To avoid setting state on unmounted component
-    const token = localStorage.getItem("token") || "";
-    const serverId = (params.slug as string) || "";
+    let isMounted = true;
 
     const fetchLogs = async () => {
-      const res = await serverLogs(token, serverId);
-      if (res?.data && isMounted) {
-        console.log(res.data);
-        setLog(res.data);
+      try {
+        const { data } = await serverLogs(serverId);
+        if (isMounted) {
+          setLog(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch logs:", error);
       }
     };
 
+    serverStatus();
     fetchLogs();
-    const interval = setInterval(fetchLogs, 3000); // 3 seconds
+    const interval = setInterval(fetchLogs, 3000);
 
     return () => {
       isMounted = false;
       clearInterval(interval);
     };
-  }, [params.slug]);
+  }, [serverId, serverStatus]);
 
   return (
     <section className="py-4">
@@ -52,32 +76,35 @@ export default function CommandPanel() {
           <div className="flex w-full gap-x-6">
             <Button
               className="w-full"
-              variant="flat"
-              color="success"
+              variant={serverRunning ? "flat" : "solid"}
+              color={serverRunning ? "default" : "success"}
               onPress={() => handleAction("start_server")}
+              disabled={serverRunning}
             >
               Start
             </Button>
             <Button
               className="w-full"
-              variant="flat"
-              color="secondary"
+              variant={serverRunning ? "solid" : "flat"}
+              color={serverRunning ? "success" : "default"}
               onPress={() => handleAction("restart_server")}
+              disabled={!serverRunning}
             >
               Restart
             </Button>
             <Button
               className="w-full"
-              variant="flat"
-              color="danger"
+              variant={serverRunning ? "solid" : "flat"}
+              color={serverRunning ? "danger" : "default"}
               onPress={() => handleAction("stop_server")}
+              disabled={!serverRunning}
             >
               Stop
             </Button>
           </div>
         </CardHeader>
         <CardBody>
-          {log && log.length > 0 ? (
+          {log ? (
             <pre
               className="whitespace-pre-wrap max-h-80 overflow-y-scroll"
               dangerouslySetInnerHTML={{ __html: Array.from(log).join("\n") }}

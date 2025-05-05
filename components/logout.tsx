@@ -3,13 +3,17 @@
 import { Button } from "@heroui/button";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
+import { logout } from "@/lib/api/craftyController";
+
 export default function Logout() {
   const router = useRouter();
-  const handleLogout = () => {
-    // Clear the token from cookies
-    document.cookie = "token=; path=/; max-age=0; secure; SameSite=Strict";
-    // Redirect to the login page
-    router.push("/login");
+  const handleLogout = async () => {
+    const response = await logout();
+    if (response?.status === "ok") {
+      router.push("/login");
+    } else {
+      console.warn("Unexpected logout response:", response);
+    }
   };
   return (
     <Button

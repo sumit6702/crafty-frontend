@@ -8,7 +8,8 @@ import {
   addToast,
   Tooltip,
 } from "@heroui/react";
-import { serverTypes } from "@/lib/api/servers_helps";
+// import { serverTypes } from "@/lib/api/servers_helps";
+import { serverJars } from "@/lib/api/craftyController";
 import { Icon } from "@iconify/react";
 
 const loadServerTypesFromCache = () => {
@@ -28,9 +29,8 @@ export function ServerCreate() {
   const [serverData, setServerData] = React.useState([]);
 
   const handleReloadCache = async () => {
-    const token = localStorage.getItem("token") || "";
-    const fresh = await serverTypes(token);
-    if (fresh) setServerData(fresh);
+    const fresh = await serverJars();
+    if (fresh) setServerData(fresh.data);
     addToast({
       title: "Server Types",
       description: "Server types reloaded successfully",
@@ -46,9 +46,8 @@ export function ServerCreate() {
       if (cached) {
         setServerData(cached);
       } else {
-        const token = localStorage.getItem("token") || "";
-        const fresh = await serverTypes(token);
-        if (fresh) setServerData(fresh);
+        const fresh = await serverJars();
+        if (fresh) setServerData(fresh.data);
       }
     };
     loadServerData();

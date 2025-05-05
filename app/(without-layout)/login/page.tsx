@@ -7,47 +7,37 @@ import axios from "axios";
 import { Button, Input, Link, Form } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import Image from "next/image";
+import { login } from "@/lib/api/craftyController";
 
 export default function Component() {
+  const router = useRouter();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+
   const [error, setError] = useState("");
-  const router = useRouter();
   const [isVisible, setIsVisible] = React.useState(false);
 
   const toggleVisibility = () => setIsVisible(!isVisible);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
+    const tokenExists = document.cookie.includes("token=");
+    if (tokenExists) {
       router.push("/dashboard");
     }
-  });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    try {
-      const response = await axios.post(
-        "https://172.23.219.207:8443/api/v2/auth/login",
-        {
-          username,
-          password,
-        }
-      );
+    const response = await login(username, password);
+    const token = response.data.token;
 
-      const { token } = response.data.data;
-
-      if (token) {
-        document.cookie = `token=${token}; path=/; max-age=3600; secure; SameSite=Strict`;
-        localStorage.setItem("token", token);
-        router.push("/dashboard");
-      } else {
-        setError("Login failed: No token received.");
-      }
-    } catch (err: any) {
-      console.error(err);
-      setError("Login failed: Invalid credentials or server error.");
+    if (token) {
+      document.cookie = `token=${token}; path=/; max-age=3600; SameSite=Strict`;
+      router.push("/dashboard");
+    } else {
+      setError("Login failed: No token received.");
     }
   };
 

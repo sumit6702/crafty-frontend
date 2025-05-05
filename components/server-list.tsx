@@ -16,13 +16,19 @@ import {
   Skeleton,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
+// import {
+//   servers,
+//   getServerStats,
+//   serverAction,
+// } from "@/lib/api/servers_helps";
+
 import {
-  getServers,
-  getServerStats,
+  servers as apiServers,
+  serverStats,
   serverAction,
-} from "@/lib/api/servers_helps";
+  serverDelete,
+} from "@/lib/api/craftyController";
 import { useParams } from "next/navigation";
-import { serverDelete } from "@/lib/api/server_action";
 
 interface Server {
   server_id: number;
@@ -50,8 +56,7 @@ export default function ServerList() {
   const fetchServers = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token") || ""; // replace dynamically later
-      const response = await getServers(token);
+      const response = await apiServers();
       if (response?.status === "ok" && Array.isArray(response.data)) {
         const baseServers = response.data;
 
@@ -59,7 +64,9 @@ export default function ServerList() {
         const serversWithStats = await Promise.all(
           baseServers.map(async (server: any) => {
             try {
-              const stats = await getServerStats(token, server.server_id);
+              const stats = await serverStats(server.server_id).then(
+                (response) => response.data
+              );
               return {
                 ...server,
                 running: stats.running,
@@ -94,8 +101,7 @@ export default function ServerList() {
   };
 
   const handleAction = async ({ serverID, action }: ActionParams) => {
-    const token = localStorage.getItem("token") || "";
-    const res = await serverAction(token, serverID, action);
+    const res = await serverAction(serverID, action);
     console.log(res);
     if (res.status === "ok") {
       // Assuming 200 is the success status code
@@ -115,7 +121,7 @@ export default function ServerList() {
 
   const handleDelete = async (serverID: string) => {
     const token = localStorage.getItem("token") || "";
-    const res = await serverDelete(token, serverID);
+    const res = await serverDelete(serverID);
     if (res.status === "ok") {
       // setNotify(`Server deleted successfully`);
       setTimeout(async () => {
