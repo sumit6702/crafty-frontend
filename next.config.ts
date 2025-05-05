@@ -8,12 +8,6 @@ const nextConfig: NextConfig = {
         destination: "/login",
         permanent: true,
       },
-      // Wildcard path matching
-      {
-        source: "/blog/:slug",
-        destination: "/news/:slug",
-        permanent: true,
-      },
     ];
   },
 };

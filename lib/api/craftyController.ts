@@ -122,6 +122,16 @@ export async function serverDelete(id: string) {
   }
 }
 
+export async function serverConfig(id: string, data: string) {
+  try {
+    const response = await apiClient.patch(`/servers/${id}/`, data);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Failed to update server");
+  }
+}
+
 export async function serverJars() {
   try {
     const response = await apiClient.get("/crafty/JarCache");

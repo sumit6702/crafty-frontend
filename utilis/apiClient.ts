@@ -1,7 +1,7 @@
 // utils/apiClient.ts
 import axios from "axios";
 const API_URL =
-  process.env.NEXT_PUBLIC_CRAFTY_URL || "https://crafty.sumitk.in/api/v2";
+  process.env.NEXT_PUBLIC_CRAFTY_URL || "https://localhost:8443/api/v2";
 
 const apiClient = axios.create({
   baseURL: API_URL,

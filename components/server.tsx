@@ -3,11 +3,29 @@ import { Tabs, Tab } from "@heroui/tabs";
 import { Icon } from "@iconify/react";
 import ServerConfig from "./serverConfig";
 import CommandPanel from "./command-pannel";
+import { Key, useEffect, useState } from "react";
 
 export default function Server() {
+  const [activeTab, setActiveTab] = useState<string>("terminal");
+  useEffect(() => {
+    const savedTab = localStorage.getItem("activeTab");
+    if (savedTab) {
+      setActiveTab(savedTab);
+    }
+  }, []);
+  const handleTabChange = (key: Key) => {
+    const tabKey = key.toString();
+    setActiveTab(tabKey);
+    localStorage.setItem("activeTab", tabKey);
+  };
+
   return (
     <section className="p-4">
-      <Tabs aria-label="Options">
+      <Tabs
+        aria-label="Options"
+        selectedKey={activeTab}
+        onSelectionChange={handleTabChange}
+      >
         <Tab
           key="terminal"
           title={
